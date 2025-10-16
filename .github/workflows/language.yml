@@ -1,0 +1,32 @@
+name: Identificar Idioma do Sistema
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  identificar_idioma_ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verificar idioma no Ubuntu
+        run: |
+          echo "Variável de ambiente LANG: $LANG"
+          echo "Resultado do comando locale: $(locale)"
+
+  identificar_idioma_windows:
+    runs-on: windows-latest
+    steps:
+      - name: Verificar idioma no Windows
+        shell: powershell
+        run: |
+          # Obtém a cultura da thread atual, que geralmente reflete o idioma do sistema.
+          $currentCulture = [System.Globalization.CultureInfo]::CurrentCulture.Name
+          Write-Host "Cultura atual do sistema (Windows): $currentCulture"
+          
+          # Exemplo de como usar a variável em uma lógica condicional
+          if ($currentCulture -like "pt-*") {
+            Write-Host "O idioma do sistema é Português."
+          } else {
+            Write-Host "O idioma do sistema NÃO é Português."
+          }
