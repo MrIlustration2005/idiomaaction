@@ -1,0 +1,33 @@
+name: Detectar Idioma do Windows
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    # Este trabalho é executado em um runner do Windows
+    runs-on: windows-latest
+
+    steps:
+      # 1. Passo para verificar o idioma e definir uma variável de ambiente
+      - name: Identificar e Definir Idioma
+        id: set-language
+        # O shell padrão em runners do Windows é o PowerShell
+        run: |
+          $language = (Get-UICulture).Name
+          echo "O idioma detectado é: $language"
+          echo "detected_language=$language" >> $env:GITHUB_OUTPUT
+      
+      # 2. Passo para usar o idioma detectado em uma condição
+      - name: Executar se o idioma for Inglês (EUA)
+        if: steps.set-language.outputs.detected_language == 'en-US'
+        run: |
+          echo "O sistema está em Inglês. Executando tarefa específica para en-US..."
+
+      # 3. Passo para outra tarefa com base no idioma
+      - name: Executar se o idioma for Português (Brasil)
+        if: steps.set-language.outputs.detected_language == 'pt-BR'
+        run: |
+          echo "O sistema está em Português. Executando tarefa específica para pt-BR..."
