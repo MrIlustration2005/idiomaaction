@@ -1,0 +1,44 @@
+name: Detectar Idioma do Sistema
+
+on: [push, workflow_dispatch]
+
+jobs:
+  detectar-idioma-so:
+    # Usamos uma matriz para executar o job em diferentes sistemas operacionais
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Detectar idioma no Linux
+        if: startsWith(runner.os, 'Linux')
+        id: locale_linux
+        run: |
+          locale=$(locale -a | grep -i "${{ env.LANG }}" | head -n 1)
+          echo "system_locale=$locale" >> $GITHUB_OUTPUT
+        env:
+          LANG: ${{ matrix.os == 'ubuntu-latest' && 'en_US.UTF-8' || 'pt_BR.UTF-8' }} # Exemplo de como usar a variável LANG
+
+      - name: Detectar idioma no Windows
+        if: startsWith(runner.os, 'Windows')
+        id: locale_windows
+        shell: powershell
+        run: |
+          $culture = (Get-Culture).Name
+          echo "system_locale=$culture" >> $GITHUB_OUTPUT
+
+      - name: Detectar idioma no macOS
+        if: startsWith(runner.os, 'macOS')
+        id: locale_macos
+        run: |
+          locale=$(locale | grep -i "LANG" | cut -d "=" -f 2)
+          echo "system_locale=$locale" >> $GITHUB_OUTPUT
+
+      - name: Exibir idioma detectado
+        run: |
+          echo "O idioma do sistema é: ${{ steps.locale_linux.outputs.system_locale || steps.locale_windows.outputs.system_locale || steps.locale_macos.outputs.system_locale }}"
+
